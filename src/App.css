@@ -37,10 +37,7 @@
   }
 }
 
-
-
-
-/** nav bar*/ 
+/** nav bar*/
 @import url("https://fonts.googleapis.com/css2?family=Lato&display=swap");
 
 * {
@@ -54,9 +51,6 @@
 .reports,
 .products {
   display: flex;
-  height: 90vh;
-  align-items: center;
-  justify-content: center;
   font-size: 3rem;
   background-color: #021f54;
   color: #fff;
@@ -76,6 +70,7 @@
   font-size: 2rem;
   background: none;
   color: #021f54;
+  border: transparent;
 }
 
 .nav-menu {
@@ -93,15 +88,17 @@
 .nav-menu.active {
   left: 0;
   transition: 450ms;
+  z-index: 3;
 }
 
 .nav-text {
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  padding: 8px 0px 8px 16px;
+  padding: 8px 0px 8px 0px;
   list-style: none;
   height: 60px;
+  width: 100%;
 }
 
 .nav-text a {
@@ -112,7 +109,7 @@
   height: 100%;
   display: flex;
   align-items: center;
-  padding: 0 16px;
+  padding: 0 10px;
   border-radius: 4px;
 }
 
@@ -139,3 +136,58 @@ span {
 }
 
 /** Fin NavBar*/
+
+table {
+  font-family: helvetica;
+  font-size: 12px;
+}
+td,
+th {
+  border: 1px solid;
+  width: 1000px;
+  background: rgb(36, 39, 68);
+  box-sizing: border-box;
+  padding: 0.5rem;
+  text-align: center;
+}
+th,
+td:first-child {
+  width: 10px;
+}
+.table-container {
+  overflow: scroll;
+  width: 100%;
+}
+
+thead th {
+  position: -webkit-sticky;
+  text-align: center;
+  top: 0;
+  z-index: 0;
+  background: hsl(0, 0%, 0%);
+}
+
+tfoot {
+  position: -webkit-sticky;
+  bottom: 0;
+  z-index: 2;
+}
+
+tfoot td {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  background: hsl(20, 50%, 70%);
+}
+
+tbody {
+  overflow: scroll;
+  border-color: #fff;
+  border: #fff;
+  border-width: 1rem;
+}
+
+.map {
+  width: 500px;
+  height: 500px;
+}

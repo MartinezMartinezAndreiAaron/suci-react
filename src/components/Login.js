@@ -2,21 +2,17 @@ import React, { useState } from "react";
 //css
 import "../assets/Login.css";
 //servicios
-import { login } from "../services/UsuarioSevice";
+import { Apiurl } from "../services/ApiRest";
 //libreria
-import { useNavigate } from "react-router-dom";
+import axios from "axios";
+
+import {useNavigate } from "react-router-dom";
 
 
 function Login() {
-  const [usuario, setusuario] = useState({ 
-    usuario: "", 
-    contraseña: "" }
-    );
+  const [usuario, setusuario] = useState({ usuario: "", contraseña: "" });
 
-  const [error, seterror] = useState({
-     error: false,
-      errorMsg: "" 
-    });
+  const [error, seterror] = useState({ error: false, errorMsg: "" });
 
   const navigate = useNavigate();
 
@@ -32,47 +28,63 @@ function Login() {
     });
   };
 
-  const manejadorBoton = async () => {
-    let response = await login(usuario);
-    if (response.status === 200){
-      let tUsuario = response.data.tipousuariofk.idtipousuario;
-      if (tUsuario === 5 ){
-        sessionStorage.setItem("idusuario",
-        response.data.idusuarios
-      );
-      sessionStorage.setItem(
-        "idpersona",
-        response.data.idpersonafk.idpersona
-      );
-      sessionStorage.setItem(
-        "idtipousuario",
-        response.data.tipousuariofk.idtipousuario
-      );
-      navigate("/home");
-      }else if (tUsuario === 6) {
-        sessionStorage.setItem("idusuario", response.data.idusuarios);
-        sessionStorage.setItem(
-          "idpersona",
-          response.data.idpersonafk.idpersona
-        );
-        sessionStorage.setItem(
-          "idtipousuario",
-          response.data.tipousuariofk.idtipousuario
-        );
-        navigate("/home");
-      } else {
+  const manejadorBoton = () => {
+    let url = Apiurl + "usuarios/login";
+    axios
+      .post(url, usuario)
+      .then((response) => {
+        if (response.status === 200) {
+          let tUsuario = response.data.tipousuariofk.idtipousuario;
+          if (tUsuario === 1) {
+            localStorage.setItem(
+              "userInfo",
+              JSON.stringify(response.data)
+            );
+            localStorage.setItem(
+              "idusuario",
+              response.data.idusuarios
+            );
+            localStorage.setItem(
+              "idpersona",
+              response.data.idpersonafk.idpersona
+            );
+            localStorage.setItem(
+              "idtipousuario",
+              response.data.tipousuariofk.idtipousuario
+            );
+            navigate("/home");
+          } else if (tUsuario === 2) {
+            localStorage.setItem("idusuario", response.data.idusuarios);
+            localStorage.setItem(
+              "idpersona",
+              response.data.idpersonafk.idpersona
+            );
+            localStorage.setItem(
+              "idtipousuario",
+              response.data.tipousuariofk.idtipousuario
+            );
+          } else {
+            seterror({
+              error: true,
+              errorMsg: "Error: Usuario no encontrado",
+            });
+          }
+          //console.log(response);
+        } else {
+          seterror({
+            error: true,
+            errorMsg: "Usuario y/o Constraseña Incorrectos",
+          });
+        }
+      })
+      .catch((error) => {
+        console.log(error);
         seterror({
           error: true,
-          errorMsg: "Error: Usuario no encontrado",
+          errorMsg: "Error: Ocurrio un problema",
         });
-    }
-  }else {
-    seterror({
-      error: true,
-      errorMsg: "Usuario y/o Constraseña Incorrectos",
-    });
-  }
-};
+      });
+  };
 
   return (
     <>

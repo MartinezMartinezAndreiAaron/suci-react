@@ -18,7 +18,6 @@ body {
 }
 
 .main {
-    /** Arreglar lo largo para que no tenga scroll     width: 50%; */
     padding: 0px 10px;
     position: relative;
     top: -150px; left: 100px;
