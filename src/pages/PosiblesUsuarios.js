@@ -1,60 +1,58 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { getReportes } from "../services/ApiRest";
-import { useTable, usePagination, useGlobalFilter } from "react-table";
 import NavBarAdmin from "../components/NavBarAdmin";
 import NavBarSupervisor from "../components/NavBarSupervisor";
-import { useNavigate } from "react-router-dom";
+import { getUsuariosPosibles } from "../services/ApiRest";
+import { useTable, usePagination, useGlobalFilter } from "react-table";
 import FiltroGlobal from "../components/FiltroGlobal";
+import { useNavigate } from "react-router-dom";
 
-function Reportes() {
-  const navigate = useNavigate();
+function PosiblesUsuarios() {
   let tipoUsuario = sessionStorage.getItem("idtipousuario");
-  const [reportes, setReportes] = useState([]);
+  const navigate = useNavigate();
+  const [usuariosP, setUsuariosP] = useState([]);
+
   const columns = useMemo(
     () => [
       {
         Header: "ID",
-        accessor: "idreporte", // accessor is the "key" in the data
+        accessor: "idposibleusuario", // accessor is the "key" in the data
       },
       {
-        Header: "Descripcion",
-        accessor: "descripcion", // accessor is the "key" in the data
+        Header: "Nombre",
+        accessor: "nombres", // accessor is the "key" in the data
       },
       {
-        Header: "Fecha",
-        accessor: "fecha",
+        Header: "Apellido paterno",
+        accessor: "apellidop",
       },
       {
-        Header: "Direccion",
-        accessor: "direccion",
+        Header: "Apellido materno",
+        accessor: "apellidom",
       },
       {
-        Header: "Estatus",
-        accessor: "estatus",
-      },
-      {
-        Header: "Reportador",
-        accessor: "idreportadorfk.nombres",
+        Header: "Usuario",
+        accessor: "usuario",
       },
       {
         Header: "Acciones",
         Cell: ({ cell }) => (
-          <button
-            className="btn btn-primary"
-            title="Revisar"
-            onClick={() =>
-              navigate("/revisionReportes?id=" + cell.row.values.idreporte)
-            }
-          >
-            <ion-icon name="pencil"></ion-icon>
-          </button>
+          <div>
+            <button
+              className="btn btn-primary"
+              onClick={() => {
+                navigate("/revisionUsuarios?id=" + cell.row.values.idposibleusuario);
+              }}
+            >
+              <ion-icon name="pencil"></ion-icon>
+            </button>
+          </div>
         ),
       },
     ],
     []
   );
   const tableInstance = useTable(
-    { columns, data: reportes },
+    { columns, data: usuariosP },
     useGlobalFilter,
     usePagination
   );
@@ -76,81 +74,28 @@ function Reportes() {
 
   const { pageIndex, globalFilter } = state;
 
-  const obtenerReportes = async () => {
-    return await getReportes();
+  const obtenerUsuarios = async () => {
+    return await getUsuariosPosibles();
   };
 
   useEffect(() => {
-    obtenerReportes().then((data) => setReportes(data));
+    obtenerUsuarios().then((data) => {
+      setUsuariosP(data);
+    });
     setPageSize(10);
   }, []);
 
   return (
     <>
+      {" "}
       {tipoUsuario === "1" ? <NavBarSupervisor /> : <NavBarAdmin />}
-      <div className="reports text-center">
+      <div className="reports">
         <div className="container-fluid table-responsive">
-          <h1>Reportes</h1>
+          <h1>Solicitudes de usuarios</h1>
           <div className="d-flex justify-content-center mx-3">
             <FiltroGlobal filter={globalFilter} setFilter={setGlobalFilter} />
           </div>
-          <div
-            className="container-fluid btn-group mb-2"
-            role="group"
-            aria-label="Basic checkbox toggle button group"
-          >
-            <input
-              type="checkbox"
-              className="btn-check"
-              id="btncheck1"
-              autoComplete="off"
-              onClick={(e) => {
-                if (e.target.checked === true) {
-                  setGlobalFilter("Aceptado");
-                } else {
-                  setGlobalFilter("");
-                }
-              }}
-            />
-            <label className="btn btn-dark" htmlFor="btncheck1">
-              Reportes aceptados
-            </label>
-
-            <input
-              type="checkbox"
-              className="btn-check"
-              id="btncheck2"
-              autoComplete="off"
-              onClick={(e) => {
-                if (e.target.checked === true) {
-                  setGlobalFilter("Rechazado");
-                } else {
-                  setGlobalFilter("");
-                }
-              }}
-            />
-            <label className="btn btn-dark" htmlFor="btncheck2">
-              Reportes rechazados
-            </label>
-
-            <input
-              type="checkbox"
-              className="btn-check"
-              id="btncheck3"
-              autoComplete="off"
-              onClick={(e) => {
-                if (e.target.checked === true) {
-                  setGlobalFilter("Revision");
-                } else {
-                  setGlobalFilter("");
-                }
-              }}
-            />
-            <label className="btn btn-dark" htmlFor="btncheck3">
-              Reportes en revisión
-            </label>
-          </div>
-          <table className="table-dark " {...getTableProps()}>
+          <table className="table-dark mt-2 " {...getTableProps()}>
             <thead>
               {
                 // Loop over the header rows
@@ -204,10 +149,7 @@ function Reportes() {
             </tbody>
           </table>
           <div className="container mt-2 text-center justify-content-end fs-5">
-            
-            
-            {/* Paginacion */}
-            {/* <div className="container row">
+            <div className="container row">
               <span>
                 Pagina{" "}
                 <strong>
@@ -234,7 +176,7 @@ function Reportes() {
               >
                 Siguiente
               </button>
-            </div> */}
+            </div>
           </div>
         </div>
       </div>
@@ -242,4 +184,4 @@ function Reportes() {
   );
 }
 
-export default Reportes;
+export default PosiblesUsuarios;

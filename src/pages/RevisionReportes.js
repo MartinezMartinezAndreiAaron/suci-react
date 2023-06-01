@@ -4,6 +4,8 @@ import NavBarAdmin from "../components/NavBarAdmin";
 import NavBarSupervisor from "../components/NavBarSupervisor";
 import {
   cambiarEstatus,
+  enviarCorreoReporte,
+  enviarNotificacion,
   getConductorInfo,
   getReporte,
   nuevaMulta,
@@ -15,7 +17,7 @@ import Modal from "react-bootstrap/Modal";
 
 function RevisionReportes() {
   const navigate = useNavigate();
-  let tipoUsuario = localStorage.getItem("idtipousuario");
+  let tipoUsuario = sessionStorage.getItem("idtipousuario");
 
   const [alerta, setAlerta] = useState(false);
   const [modalIsOpen, setIsOpen] = useState(false);
@@ -57,33 +59,39 @@ function RevisionReportes() {
     });
   };
   const denegarReporte = () => {
-    cambiarEstatus(reporte.idreporte, "Rechazado").catch((error) =>
-      alert(error)
-    );
+    if (datoConductor === "" || multa.monto === "" || multa.razon === "") {
+      return setAlerta(true);
+    }
+    cambiarEstatus(reporte.idreporte, "Rechazado")
+      .then(enviarCorreoReporte(reporte.idreportadorfk.correo, false))
+      .catch((error) => {
+        alert(error);
+        return;
+      });
+    enviarNotificacion("ExponentPushToken[wg6ucrGk7QmGEUntUUBuNR]", false);
+    navigate("/reportes");
   };
   const AceptarReporte = async (reporte) => {
     multa.idreportadorfk = reporte.idreportadorfk;
     multa.personal.idpersonal = "1";
-    multa.reportefk.idreporte=reporte.idreporte
-    multa.infraccion=reporte.razon;
-    if (
-      datoConductor=== "" ||
-      multa.monto === "" ||
-      multa.razon === ""
-    ) {
-      return setAlerta(true);
+    multa.reportefk.idreporte = reporte.idreporte;
+    multa.infraccion = reporte.razon;
+    if (datoConductor === "" || multa.monto === "" || multa.razon === "") {
+    return setAlerta(true);
     }
     multa.idconductorfk = await getConductorInfo(
       datoConductor,
       datoConductor,
       datoConductor
     );
-    console.log(multa)
-     nuevaMulta(multa).then(
-       cambiarEstatus(reporte.idreporte, "Aceptado")
-         .then(console.log("Listo"))
-         .catch((error) => console.error(error))
-     );
+    nuevaMulta(multa).then(
+      cambiarEstatus(reporte.idreporte, "Aceptado")
+        .then()
+        .catch((error) => console.error(error))
+    );
+    await enviarCorreoReporte(reporte.idreportadorfk.correo, true);
+    await enviarNotificacion("ExponentPushToken[wg6ucrGk7QmGEUntUUBuNR]", true);
+    navigate("/reportes");
   };
 
   useEffect(() => {
@@ -224,14 +232,20 @@ function RevisionReportes() {
                 >
                   Monto
                 </label>
-                <input
-                  type="numeric"
-                  className="form-control"
-                  name="monto"
-                  id="exampleFormControlInput1"
-                  placeholder="Monto de la multa"
-                  onChange={(e) => manejadorChange(e)}
-                />
+                <select
+                  className="form-select"
+                  aria-label="Default select example"
+                  onChange={(e) => {
+                    manejadorChange(e);
+                  }}
+                >
+                  <option selected defaultValue={"0"}>Seleccionar infraccion</option>
+                  <option value="1000">Mal estacionado</option>
+                  <option value="2000">Pasarse un alto</option>
+                  <option value="3000">Auto sin luces</option>
+                  <option value="4000">No usar el cinturón de seguridad</option>
+                  <option value="5000">Uso de celular al manejar</option>
+                </select>
               </div>
               <div className="mb-3">
                 <label
@@ -334,7 +348,6 @@ function RevisionReportes() {
               onClick={() => {
                 setIsOpenAceptar(!modalIsOpenAceptar);
                 AceptarReporte(reporte);
-                //navigate("/reportes");
               }}
             >
               Confirmar
@@ -361,7 +374,6 @@ function RevisionReportes() {
               onClick={() => {
                 setIsOpenRechazar(!modalIsOpenRechazar);
                 denegarReporte();
-                navigate("/reportes");
               }}
             >
               Confirmar
